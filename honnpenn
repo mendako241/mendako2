@@ -87,4 +87,4 @@ async def on_message(message):
 
 # ===== 起動 =====
 keep_alive()
-bot.run("ここにトークン")
+bot.run("TOKEN")
