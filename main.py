@@ -2,24 +2,26 @@ import discord
 from discord.ext import commands
 from googletrans import Translator
 from langdetect import detect
-import os
-
 from flask import Flask
 from threading import Thread
+import os
 
-app = Flask('')
+# Flask
+app = Flask(__name__)
 
-@app.route('/')
+@app.route("/")
 def home():
-    return "alive"
+    return "Bot is alive"
 
-def run():
-    app.run(host="0.0.0.0", port=10000)
+def run_web():
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
 
 def keep_alive():
-    t = Thread(target=run)
+    t = Thread(target=run_web)
     t.start()
 
+# Discord Bot
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -34,6 +36,9 @@ async def on_ready():
 async def on_message(message):
 
     if message.author.bot:
+        return
+
+    if message.webhook_id is not None:
         return
 
     text = message.content.strip()
@@ -58,23 +63,7 @@ async def on_message(message):
     except:
         return
 
-    webhooks = await message.channel.webhooks()
-    webhook = None
+    await message.channel.send(translated)
 
-    for wh in webhooks:
-        if wh.name == "translator_bot":
-            webhook = wh
-            break
-
-    if webhook is None:
-        webhook = await message.channel.create_webhook(name="translator_bot")
-
-    await webhook.send(
-        content=translated,
-        username=message.author.display_name,
-        avatar_url=message.author.display_avatar.url
-    )
-
-    await bot.process_commands(message)
-
+keep_alive()
 bot.run(os.getenv("TOKEN"))
