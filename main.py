@@ -4,6 +4,22 @@ from googletrans import Translator
 from langdetect import detect
 import os
 
+from flask import Flask
+from threading import Thread
+
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "alive"
+
+def run():
+    app.run(host="0.0.0.0", port=10000)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
 intents = discord.Intents.default()
 intents.message_content = True
 
